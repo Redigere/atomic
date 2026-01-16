@@ -7,8 +7,8 @@
 
 ## Engineering Checklist
 
-- [ ] **Build:** `npm run build` passes locally.
-- [ ] **Lint:** No ESLint/Biome errors.
-- [ ] **Typecheck:** No TypeScript `any` or errors.
-- [ ] **Standards:** Content & Code follow `style.md` guidelines.
-- [ ] **A11y:** Semantic HTML and ARIA labels used where appropriate.
+- [ ] **Lint:** `shellcheck` passes for modified scripts.
+- [ ] **Permissions:** Scripts have `+x` execution rights.
+- [ ] **Standards:** Code follows `style.md` (Google Style/Shell formatting).
+- [ ] **Testing:** Verified on Fedora Silverblue/Kionite.
+- [ ] **Error Handling:** `set -euo pipefail` is used where appropriate.

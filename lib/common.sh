@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
-# Fedora Atomic Common Library
+# @file common.sh
+# @brief Fedora Atomic Common Library
+# @description
+#   Shared utilities for all Fedora Atomic scripts.
+#   Provides logging, user detection, ownership management, and command validation.
 
 set -euo pipefail
 
@@ -12,6 +16,8 @@ readonly YELLOW='\033[0;33m'
 readonly BLUE='\033[0;34m'
 readonly NC='\033[0m'
 
+# @description Detects the current Fedora Atomic variant.
+# @stdout The distro name: kionite, silverblue, cosmic, or unknown
 detect-distro() {
     [[ -n "${FORCE_DISTRO:-}" ]] && return
 
@@ -26,10 +32,14 @@ detect-distro() {
     fi
 }
 
+# @description Gets the real user when running under sudo.
+# @stdout The actual username
 get-real-user() {
     echo "${SUDO_USER:-$USER}"
 }
 
+# @description Gets the home directory of the real user.
+# @stdout The home directory path
 get-user-home() {
     getent passwd "$(get-real-user)" | cut -d: -f6
 }
@@ -52,40 +62,68 @@ ensure-root() {
     fi
 }
 
+# @description Warns if running as strict root without SUDO_USER context.
 ensure-user() {
     if [[ "$EUID" -eq 0 ]] && [[ -z "${SUDO_USER:-}" ]]; then
         log-warn "Running as strict root. Some user-specific settings might not apply correctly."
     fi
 }
 
-log-info() { printf "${BLUE}[INFO]${NC} %s\n" "$*"; }
-log-warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$*" >&2; }
-log-error() { printf "${RED}[ERROR]${NC} %s\n" "$*" >&2; }
-log-success() { printf "${GREEN}[OK]${NC} %s\n" "$*"; }
+log-info() { 
+  printf "${BLUE}[INFO]${NC} %s\n" "$*"; 
+}
+
+log-warn() { 
+  printf "${YELLOW}[WARN]${NC} %s\n" "$*" >&2;   
+}
+
+log-error() { 
+  printf "${RED}[ERROR]${NC} %s\n" "$*" >&2; 
+}
+
+log-success() { 
+  printf "${GREEN}[OK]${NC} %s\n" "$*"; 
+}
+
 log-title() {
     printf "\n${BOLD}${BLUE}**** %s ****${NC}\n" "$*"
 }
 
+# @description Fixes ownership of a path to the real user.
+# @arg $1 string Path to fix
 fix-ownership() {
     local path="$1"
     [[ -n "${SUDO_USER:-}" ]] && /usr/bin/chown "$(get-real-user):$(get-real-user)" "$path"
 }
 
+# @description Recursively fixes ownership of a path to the real user.
+# @arg $1 string Path to fix
 fix-ownership-recursive() {
     local path="$1"
     [[ -n "${SUDO_USER:-}" ]] && chown -R "$(get-real-user):$(get-real-user)" "$path"
 }
 
+# @description Checks if a command exists.
+# @arg $1 string Command name
+# @exitcode 0 Command exists
+# @exitcode 1 Command not found
 command-exists() {
     command -v "$1" &>/dev/null
 }
 
+# @description Requires a command to be available, exits if not found.
+# @arg $1 string Command name
+# @arg $2 string Optional error message
 require-command() {
     local cmd="$1"
     local msg="${2:-$cmd is required but not installed}"
     command-exists "$cmd" || { log-error "$msg"; exit 1; }
 }
 
+# @description Prompts for user confirmation.
+# @arg $1 string Optional prompt message
+# @exitcode 0 User confirmed
+# @exitcode 1 User declined
 confirm() {
     local prompt="${1:-Are you sure?}"
     printf "${YELLOW}%s [y/N] ${NC}" "$prompt"

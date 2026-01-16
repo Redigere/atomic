@@ -27,6 +27,10 @@ get-distro-dir() {
 run-scripts() {
     local distro core_dir distro_dir
     distro="$(detect-distro)"
+
+    if [[ "$distro" == "unknown" ]]; then
+        log-warn "Running on unsupported distro (Toolbx or non-Fedora Atomic). Only common scripts will be executed."
+    fi
     core_dir="$(get-core-dir)"
     distro_dir="$(get-distro-dir)"
 
@@ -44,7 +48,6 @@ run-scripts() {
         "$core_dir/manage-system.sh"
         "$core_dir/set-safe-delete.sh"
         "$core_dir/set-omz.sh"
-        "$core_dir/set-codium.sh"
         "$core_dir/optimize-system.sh"
     )
 

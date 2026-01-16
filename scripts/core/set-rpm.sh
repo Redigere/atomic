@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
-# Set RPM Packages
+# @file set-rpm.sh
+# @brief Manages RPM packages via rpm-ostree
+# @description
+#   Removes base packages per distro and installs common packages
+#   including third-party repositories.
 
 set -euo pipefail
 
@@ -57,15 +61,16 @@ readonly -a COSMIC_PACKAGES_TO_INSTALL=(
     "${COMMON_PACKAGES_TO_INSTALL[@]}"
 )
 
-
+# @description Removes base packages for a distro.
+# @arg $1 string Distro name
+# @arg $2 string Array reference name
 remove-base-packages() {
     local distro="$1"
     local packages_ref="$2"
-
-    log-info "Removing base packages for $distro"
-
     local -a valid_packages=()
     local ostree_status
+
+    log-info "Removing base packages for $distro"
     ostree_status="$(rpm-ostree status)"
 
     for pkg in "${(@P)packages_ref}"; do
@@ -88,7 +93,7 @@ remove-base-packages() {
     fi
 }
 
-
+# @description Installs third-party repositories.
 install-third-party-repos() {
     log-info "Installing third-party repositories"
 
@@ -101,7 +106,8 @@ install-third-party-repos() {
     fi
 }
 
-
+# @description Installs packages via rpm-ostree.
+# @arg $1 string Array reference name
 install-packages() {
     local packages_ref="$1"
 
@@ -113,8 +119,9 @@ install-packages() {
     fi
 }
 
-
+# @description Main entry point.
 main() {
+    command-exists rpm-ostree || { log-warn "rpm-ostree not available, skipping"; return 0; }
     ensure-root
     local distro
     distro="$(detect-distro)"
@@ -138,11 +145,10 @@ main() {
             install-packages COSMIC_PACKAGES_TO_INSTALL
             ;;
         *)
-            log-error "Unknown distro: $distro"
-            exit 1
+            log-warn "Unknown distro: $distro, skipping RPM management"
+            return 0
             ;;
     esac
 }
-
 
 main "$@"

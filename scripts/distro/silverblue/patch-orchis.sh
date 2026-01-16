@@ -36,8 +36,8 @@ patch-border-radius() {
     log-info "Patching border-radius to ${APP_RADIUS}..."
 
     local -a radius_vars=(
-        border-radius material-radius button-radius menu-radius
-        menuitem-radius window-radius circular-radius popover-radius
+        border-radius material-radius button-radius
+        window-radius circular-radius popover-radius
         card-radius dialog-radius tooltip-radius corner-radius
         panel-radius entry-radius switch-radius
     )
@@ -73,7 +73,7 @@ apply-window-override() {
 /* Kairosci Style - Subtle window rounding */
 window, .window-frame, .csd, decoration { border-radius: 4px; }
 .titlebar, headerbar { border-radius: 4px 4px 0 0; }
-.dialog-vbox, popover, menu, .menu, tooltip, .tooltip { border-radius: 4px; }
+.dialog-vbox, popover, tooltip, .tooltip { border-radius: 4px; }
 windowcontrols, .titlebutton { border-radius: 2px; }
 EOF
         log-info "Created $dir/gtk.css"
